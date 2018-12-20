@@ -30,7 +30,7 @@ app.post('/api/login', (req, res) => {
         email: 'john"email.com'
     }
 
-    jwt.sign({user},'secretKey', (err, token) => {
+    jwt.sign({user},'secretKey', { expiresIn: '30s' }, (err, token) => {
         res.json({
             token
         });
