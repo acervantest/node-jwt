@@ -9,9 +9,16 @@ app.get('/api', (req, res) => {
     });
 });
 
-app.post('/api/newpost', (req, res) => {
-    res.json({
-        message: 'Post created...'
+app.post('/api/newpost', verifyToken, (req, res) => {
+    jwt.verify(req.token, 'secretKey', (err, authData) => {
+        if(err){
+            res.sendStatus(403);
+        }else{
+            res.json({
+                message: 'Post created...',
+                authData
+            });
+        }
     });
 });
 
@@ -23,12 +30,26 @@ app.post('/api/login', (req, res) => {
         email: 'john"email.com'
     }
 
-    jwt.sign({user},'secretkey', (err, token) => {
+    jwt.sign({user},'secretKey', (err, token) => {
         res.json({
             token
         });
     });
 })
+
+//this function verifies the presence of a token
+function verifyToken(req, res, next){
+    const bearerHeader = req.headers['authorization'];
+    if(typeof bearerHeader !== 'undefined'){
+        //bearer <access_token> format
+        const bearer = bearerHeader.split(' ');
+        const bearerToken = bearer[1];
+        req.token = bearerToken;
+        next();
+    }else{
+        res.sendStatus(403);
+    }
+}
 
 const PORT = 5000;
 
